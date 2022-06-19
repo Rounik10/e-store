@@ -14,12 +14,15 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
 
-  Product.create({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    description: description,
-  })
+  // createProduct function is available in req.user since we have defined that
+  // User.hasMany(Product, ...) in app.js
+  req.user
+    .createProduct({
+      title: title,
+      imageUrl: imageUrl,
+      price: price,
+      description: description,
+    })
     .then(() => {
       console.log('Created new Product');
       res.redirect('products');
