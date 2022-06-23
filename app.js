@@ -17,6 +17,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 app.use((req, res, next) => {
   User.findByPk(1)
@@ -44,7 +46,12 @@ Cart.belongsTo(User);
 Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
 
+User.hasMany(Order);
+Order.hasOne(User);
+Order.belongsToMany(Product, { through: OrderItem });
+
 sequelize
+  // .sync({ force: true })
   .sync()
   .then(() => {
     return User.findByPk(1);
@@ -54,11 +61,9 @@ sequelize
       return User.create({
         name: 'Rounik',
         email: 'rounik1020@gmail.com',
-      })
-        .then(() => {
-          user.creatCart();
-        })
-        .catch((err) => console.log(err));
+      }).then((user) => {
+        user.createCart();
+      });
     }
     return user;
   })
