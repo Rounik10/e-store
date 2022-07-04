@@ -1,44 +1,50 @@
 const Product = require('../models/product');
-const Cart = require('../models/cart');
-const CartItem = require('../models/cart-item');
 
-exports.getProducts = (req, res, next) => {
-  Product.findAll()
-    .then((prods) => {
-      res.render('shop/product-list', {
-        prods: prods,
-        pageTitle: 'All Products',
-        path: '/products',
-      });
-    })
-    .catch((err) => console.log(err));
-};
-
-exports.getProduct = (req, res, next) => {
-  const prodId = req.params.productId;
-  Product.findById(prodId).then(([rows]) => {
-    res.render('shop/product-detail', {
-      product: rows[0],
-      pageTitle: rows[0].title,
+exports.getProducts = async (req, res, next) => {
+  try {
+    const prods = await Product.getAll();
+    res.render('shop/product-list', {
+      prods: prods,
+      pageTitle: 'All Products',
       path: '/products',
     });
-  });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.render('error', { error: err });
+  }
 };
 
-exports.getIndex = (req, res, next) => {
-  Product.findAll()
-    .then((prods) => {
-      res.render('shop/index', {
-        prods: prods,
-        pageTitle: 'Shop',
-        path: '/',
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500);
-      res.render('error', { error: err });
+exports.getProduct = async (req, res, next) => {
+  try {
+    const prodId = req.params.productId;
+    const product = await Product.getById(prodId);
+
+    res.render('shop/product-detail', {
+      product: product,
+      pageTitle: product.title,
+      path: '/products',
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.render('error', { error: err });
+  }
+};
+
+exports.getIndex = async (req, res, next) => {
+  try {
+    const prods = await Product.getAll();
+    res.render('shop/product-list', {
+      prods: prods,
+      pageTitle: 'All Products',
+      path: '/products',
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+    res.render('error', { error: err });
+  }
 };
 
 exports.getCart = (req, res, next) => {
