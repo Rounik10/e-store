@@ -65,6 +65,15 @@ class Product {
     const db = getDb();
     return db.collection('products').deleteOne({ _id: ObjectId(id) });
   }
+
+  static getManyById(idList) {
+    const db = getDb();
+    const objectIdList = idList.map((it) => ObjectId(it.toString()));
+    return db
+      .collection('products')
+      .find({ _id: { $in: objectIdList } })
+      .toArray();
+  }
 }
 
 module.exports = Product;
