@@ -72,9 +72,13 @@ class User {
 
   postOrder() {
     const db = getDb();
-    return db
-      .collection('orders')
-      .insertOne({ ...this.cart, userId: this._id })
+    return this.getCart()
+      .then((products) => {
+        console.log(products);
+        return db
+          .collection('orders')
+          .insertOne({ items: [...products], userId: this._id });
+      })
       .then((result) => {
         console.log(result);
         this.cart = { items: [] };
