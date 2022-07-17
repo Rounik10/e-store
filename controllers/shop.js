@@ -47,18 +47,18 @@ exports.getIndex = async (req, res, next) => {
   }
 };
 
-exports.getCart = (req, res, next) => {
-  req.user
-    .getCart()
-    .then((productData) => {
-      console.log(productData);
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: productData,
-      });
-    })
-    .catch((err) => console.error(err));
+exports.getCart = async (req, res, next) => {
+  try {
+    const products = await req.user.getCart();
+    res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      products: products,
+    });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/');
+  }
 };
 
 exports.postCart = (req, res, next) => {
@@ -74,18 +74,15 @@ exports.postCart = (req, res, next) => {
     });
 };
 
-exports.postCartDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
-  req.user
-    .deleteCartItem(prodId)
-    .then((res) => {
-      console.log(res);
-      res.redirect('/cart');
-    })
-    .catch((err) => {
-      console.log(err);
-      res.redirect('/cart');
-    });
+exports.postCartDeleteProduct = async (req, res, next) => {
+  try {
+    const prodId = req.body.productId;
+    await req.user.deleteCartItem(prodId);
+    res.redirect('/cart');
+  } catch (err) {
+    console.log(err);
+    res.redirect('/cart');
+  }
 };
 
 exports.getOrders = (req, res, next) => {
