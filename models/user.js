@@ -39,7 +39,7 @@ userSchema.methods.getCart = async function () {
   const populated = await this.populate('cart.items.productId');
   return populated.cart.items.map((it) => {
     return {
-      ...it.productId._doc,
+      product: { ...it._doc.productId._doc },
       quantity: it.quantity,
     };
   });
@@ -49,6 +49,11 @@ userSchema.methods.deleteCartItem = async function (productId) {
   this.cart.items = this.cart.items.filter(
     (it) => it.productId.toString() !== productId.toString()
   );
+  await this.save();
+};
+
+userSchema.methods.clearCart = async function () {
+  this.cart = { items: [] };
   await this.save();
 };
 

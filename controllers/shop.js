@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -85,13 +86,12 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-exports.getOrders = (req, res, next) => {
-  req.user.getOrders().then((orders) => {
-    res.render('shop/orders', {
-      path: '/orders',
-      pageTitle: 'Your Orders',
-      orders: orders,
-    });
+exports.getOrders = async (req, res, next) => {
+  const orders = await Order.find({ userId: req.user._id });
+  res.render('shop/orders', {
+    path: '/orders',
+    pageTitle: 'Your Orders',
+    orders: orders,
   });
 };
 
@@ -102,12 +102,25 @@ exports.getCheckout = (req, res, next) => {
   });
 };
 
-exports.postOrder = (req, res, next) => {
-  req.user
-    .postOrder()
-    .then((result) => {
-      console.log(result);
-      res.redirect('/orders');
-    })
-    .catch(console.error);
+exports.postOrder = async (req, res, next) => {
+  try {
+    // Add new order
+    const orderItems = await req.user.getCart();
+
+    const newOrder = new Order({
+      userId: req.user._id,
+      items: orderItems,
+    });
+
+    await newOrder.save();
+
+    // Clear cart
+    await req.user.clearCart();
+
+    // Redirect to orders
+    res.redirect('/orders');
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Something went wrong!');
+  }
 };
