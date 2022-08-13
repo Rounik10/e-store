@@ -38,7 +38,7 @@ app.use(errorController.get404);
 async function initApp() {
   try {
     await mongoose.connect(process.env.MONGO_DB_URL, { dbName: 'e-store' });
-    app.listen(3000, () => {
+    app.listen(process.env.PORT || 3000, () => {
       console.log('Server started on http://localhost:3000');
     });
   } catch (err) {
